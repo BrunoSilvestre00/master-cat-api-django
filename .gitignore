@@ -1,0 +1,7 @@
+# /.env
+/mydatabase
+.vscode/
+*__pycache__*
+*.pyc
+upload/*.png
+Untitled*
