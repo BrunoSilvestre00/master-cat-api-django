@@ -4,6 +4,33 @@ from django.db import models
 from core.models import SoftDeletableModel
 
 
+class CATModelsEnum(object):
+    # IRT
+    RASCH = "rasch"
+    TWO_PL = "2pl"
+    THREE_PL = "3pl"
+    FOUR_PL = "4pl"
+    
+    # CDM
+    DINA = "dina"
+    DINO = "dino"
+    
+    def __iter__(self):
+        return iter(self.get_models())
+    
+    def get_irt_models(self):
+        return [self.RASCH, self.TWO_PL, self.THREE_PL, self.FOUR_PL]
+    
+    def get_cdm_models(self):
+        return [self.DINA, self.DINO]
+    
+    def get_models(self):
+        return self.get_irt_models() + self.get_cdm_models()
+    
+    def get_model_choices(self):
+        return [(model, model.upper()) for model in self.get_models()]
+    
+    
 class QuestionMetadata(models.Model):
     """
     Fields used to store CAT metadata about a question.
@@ -57,7 +84,17 @@ class QuestionPool(SoftDeletableModel):
         return f'{self.pk} {self.name}'
 
 
-class Assessment(SoftDeletableModel):
+class AssessmentMetadata(models.Model):
+    """
+    Fields used to store CAT metadata about an assessment.
+    ...
+    """
+    
+    class Meta:
+        abstract = True
+
+
+class Assessment(SoftDeletableModel, AssessmentMetadata):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     name = models.CharField("Nome", max_length=255)
     pool = models.ForeignKey(QuestionPool, on_delete=models.CASCADE, related_name="assessments")
