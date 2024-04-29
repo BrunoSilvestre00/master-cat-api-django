@@ -4,9 +4,31 @@ from django.db import models
 from core.models import SoftDeletableModel
 
 
-class QuestionMetadata(models.Model):
+class IRTParams(models.Model):
     """
-    Fields used to store CAT metadata about a question.
+    Fields used to store the parameters for the IRT model.
+    ...
+    """
+    discrimination = models.FloatField("Discriminação", default=1.0)
+    difficulty = models.FloatField("Dificuldade", default=0.0)
+    guess = models.FloatField("Chute", default=0.0)
+    
+    class Meta:
+        abstract = True
+
+
+class CDMParams(models.Model):
+    """
+    Fields used to store the parameters for the CDM model.
+    ...
+    """
+    
+    class Meta:
+        abstract = True
+
+class QuestionMetadata(IRTParams, CDMParams):
+    """
+    Merge Class to store CAT metadata about a question.
     ...
     """
     
@@ -40,7 +62,6 @@ class Alternative(SoftDeletableModel):
 
     def __str__(self) -> str:
         return f'{self.pk} - {self.text[:10]}...'
-
 
 
 class QuestionPool(SoftDeletableModel):
