@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django_ckeditor_5.fields import CKEditor5Field
 
 from core.models import SoftDeletableModel
 
@@ -38,7 +39,7 @@ class QuestionMetadata(IRTParams, CDMParams):
 
 class Question(SoftDeletableModel, QuestionMetadata):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
-    statement = models.TextField("Enunciado")
+    statement = CKEditor5Field("Enunciado")
 
     class Meta:
         db_table = "questions"
@@ -51,7 +52,7 @@ class Question(SoftDeletableModel, QuestionMetadata):
 
 class Alternative(SoftDeletableModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
-    text = models.TextField("Texto")
+    text = CKEditor5Field("Texto")
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="alternatives")
     is_correct = models.BooleanField("Correta", default=False)
     
