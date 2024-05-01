@@ -17,10 +17,10 @@ class QuestionAdmin(admin.ModelAdmin):
             'fields': ('id', 'uuid')
         }),
         ('Parâmetros IRT', {
-            'fields': ('discrimination', 'difficulty', 'guess')
+            'fields': [f.name for f in IRTParams._meta.fields]
         }),
         ('Parâmetros CDM', {
-            'fields': ()
+            'fields': [f.name for f in CDMParams._meta.fields]
         }),
         ('Conteúdo', {
             'fields': ('statement',)
