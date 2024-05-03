@@ -10,7 +10,8 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-
+    'django_ckeditor_5',
+    'django_light',
 ]
 
 LOCAL_APPS = [

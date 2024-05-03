@@ -11,6 +11,7 @@ urlpatterns = [
     # path('admin/login/', LoginView.as_view(template_name='login-form.html'), name='login'),
     path('', include('core.urls')),
     path('admin/', admin.site.urls, name='admin'),
+    path("ckeditor5/", include('django_ckeditor_5.urls'), name="ck_editor_5_upload_file"),
 ] + static(STATIC_URL, document_root=STATIC_ROOT) + static(MEDIA_URL, document_root=MEDIA_ROOT)
 
 APP_NAME = "CAT API"
