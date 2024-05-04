@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.db.models.fields.files import ImageFieldFile
 from django.utils.translation import gettext_lazy as _
@@ -119,3 +121,26 @@ class SoftDeletableUserModel(SoftDeletableModel):
 
     class Meta:
         abstract = True
+
+
+class UploadQuestions(SoftDeletableModel):
+    PROCESSING = 'processing'
+    FINISHED = 'finished'
+    ERROR = 'error'
+    
+    STATUS_CHOICES = (
+        (PROCESSING, 'Processando'),
+        (FINISHED, 'Finalizado'),
+        (ERROR, 'Erro')
+    )
+    
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PROCESSING)
+    file = models.FileField(upload_to='upload')
+    result = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'upload_questions'
+        verbose_name = 'Upload Questões'
+        verbose_name_plural = 'Uploads Questões'
+    

@@ -23,11 +23,12 @@ class CDMParams(models.Model):
     Fields used to store the parameters for the CDM model: DINA and DINO
     ...
     """
-    slip = models.FloatField("Deslize", default=0.0)
-    guess = models.FloatField("Chute", default=0.0)
+    # slipping = models.FloatField("Deslize", default=0.0)
+    # guessing = models.FloatField("Chute", default=0.0)
     
     class Meta:
         abstract = True
+
 
 class QuestionMetadata(IRTParams, CDMParams):
     """

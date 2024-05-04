@@ -15,6 +15,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    'core.apps.CoreConfig',
     'user.apps.UserConfig',
     'learning.apps.LearningConfig',
 ]
