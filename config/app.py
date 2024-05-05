@@ -12,6 +12,9 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'django_ckeditor_5',
     'django_light',
+    'rest_framework',
+    'rest_framework_swagger',
+    'drf_yasg',
 ]
 
 LOCAL_APPS = [

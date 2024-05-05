@@ -6,6 +6,9 @@ from plumber.client import PlumberClient
 
 class HealthCheck(viewsets.GenericViewSet):
     
+    def get_serializer(self, *args, **kwargs):
+        return None
+    
     @classmethod
     def __check_database_connection(cls) -> tuple:
         try:
