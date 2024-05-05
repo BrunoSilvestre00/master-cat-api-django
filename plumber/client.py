@@ -1,20 +1,20 @@
-import requests
-from decouple import config as env
+from plumber.base import BaseClient
+from typing_extensions import Tuple
 
-_PLUMBER_URL = env('PLUMBER_API_URL')
 
 class Endpoints(object):
     HEALTH_CHECK = '/hc'
 
+
 class PlumberClient(object):
 
     def __init__(self):
-        self.url = _PLUMBER_URL
+        self.base = BaseClient()
 
-    def health_check(self) -> tuple:
+    def health_check(self) -> Tuple[bool, dict]:
         try:
-            response = requests.get(f"{self.url}{Endpoints.HEALTH_CHECK}")
+            response = self.base.make_request(Endpoints.HEALTH_CHECK)
             response.raise_for_status()
             return True, response.json()
-        except requests.exceptions.RequestException:
+        except:
             return False, { 'status': 'Unhealthy!' }

@@ -80,6 +80,17 @@ class QuestionPool(SoftDeletableModel):
 
     def __str__(self) -> str:
         return f'{self.pk} {self.name}'
+    
+    def __len__(self) -> int:
+        return self.questions.count()
+    
+    @classmethod
+    def create_pool(cls, queryset: list) -> 'QuestionPool':
+        pool = cls.objects.create(name="_")
+        pool.questions.set(queryset)
+        pool.name = f"Pool_{pool.id}_{pool.created}"
+        pool.save()
+        return pool
 
 
 class Assessment(SoftDeletableModel):

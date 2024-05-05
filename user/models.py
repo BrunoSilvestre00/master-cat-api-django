@@ -17,3 +17,9 @@ class User(AbstractUser, SoftDeletableModel):
     def name(self):
         return f"{self.first_name} {self.last_name}"
 
+
+class StudentUser(User):
+    class Meta:
+        verbose_name = "Aluno"
+        verbose_name_plural = "Alunos"
+        proxy = True

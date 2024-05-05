@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 from django.contrib.auth.admin import UserAdmin as SuperUserAdmin
-from .models import User
+from .models import *
 
 
 @admin.register(User)
@@ -15,3 +15,10 @@ class UserAdmin(SuperUserAdmin):
     
     change_password_link.short_description = 'Trocar Senha'
     change_password_link.allow_tags = True
+
+@admin.register(StudentUser)
+class StudentUserAdmin(UserAdmin):
+    
+    def get_queryset(self, request):
+        qs = super(StudentUserAdmin, self).get_queryset(request)
+        return qs.filter(is_staff=False, is_superuser=False)

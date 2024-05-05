@@ -1,10 +1,12 @@
 import json
-from learning.models import Question, Alternative
+from learning.models import Question, Alternative, QuestionPool
 
 def upload_questions_json(obj_file) -> int:
     data: dict = json.load(obj_file)
     key = next(iter(data.keys()))
     question_keys = ('statement', 'discrimination', 'difficulty', 'guess')
+    
+    questions_created = []
     for question in data[key]:
         obj = Question.objects.create(
             **{k: question[k] for k in question_keys}
@@ -17,4 +19,7 @@ def upload_questions_json(obj_file) -> int:
             lambda x: 'alternative_' in x and '_is_correct' not in x, 
             question.keys()
         )])
-    return len(data[key])
+        questions_created.append(obj)
+    
+    pool = QuestionPool.create_pool(questions_created)
+    return len(pool)
