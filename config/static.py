@@ -1,9 +1,7 @@
-from ctypes import cast
 from os import path
 from decouple import config as env
 
 BASE_DIR = path.dirname(path.dirname(__file__))
-# BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
@@ -14,6 +12,7 @@ if env('DEBUG', default=False, cast=bool):
 
     STATICFILES_DIRS = (
         path.join(BASE_DIR,  'core', 'assets'),
+        path.join(BASE_DIR, 'core', 'media'),
     )
 else:
     MEDIA_ROOT = path.join(BASE_DIR, 'core', 'media')

@@ -1,18 +1,26 @@
-from django.conf import settings
 from django.conf.urls import include
-from django.conf.urls.static import static
-from django.urls import path
+from django.urls import path, re_path
+from django.views.static import serve
 from django.contrib import admin
-from django.contrib.auth.views import LoginView
 
-from config.static import STATIC_ROOT, STATIC_URL, MEDIA_ROOT, MEDIA_URL
+from config.static import STATIC_ROOT, MEDIA_ROOT
 
-urlpatterns = [
-    # path('admin/login/', LoginView.as_view(template_name='login-form.html'), name='login'),
+
+APP_URLS = [
     path('', include('core.urls')),
+]
+
+DJANGO_URLS = [
     path('admin/', admin.site.urls, name='admin'),
     path("ckeditor5/", include('django_ckeditor_5.urls'), name="ck_editor_5_upload_file"),
-] + static(STATIC_URL, document_root=STATIC_ROOT) + static(MEDIA_URL, document_root=MEDIA_ROOT)
+]
+
+STATIC_URLS = [
+    re_path(r'^media/(?P<path>.*)$', serve, { 'document_root': MEDIA_ROOT }),
+    re_path(r'^static/(?P<path>.*)$', serve, { 'document_root': STATIC_ROOT }),
+]
+
+urlpatterns = APP_URLS + DJANGO_URLS + STATIC_URLS
 
 APP_NAME = "CAT API"
 admin.site.site_header = f"{APP_NAME} Admin"
