@@ -13,6 +13,7 @@ from config.base import DEBUG
 
 APP_URLS = [
     path('', include('core.urls')),
+    path('', include('learning.urls')),
 ]
 
 DJANGO_URLS = [

@@ -54,3 +54,14 @@ class QuestionPoolAdmin(admin.ModelAdmin):
         return len(obj)
     
     get_count.short_description = "# Questões"
+
+
+@admin.register(Assessment)
+class AssessmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id', 'uuid', 'pool')
+    readonly_fields = ('id', 'uuid')
+    fieldsets = (
+        (None, {
+            'fields': ('id', 'uuid', 'name', 'pool')
+        }),
+    )

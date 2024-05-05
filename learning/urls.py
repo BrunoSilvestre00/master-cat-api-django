@@ -5,7 +5,7 @@ from .views import *
 
 
 router = routers.DefaultRouter()
-router.register(r'hc', HealthCheck, basename='health-check')
+router.register(r'user-assessment', UserAssessmentViewset, basename='user-assessment')
 
 urlpatterns = [
     path(r'api/', include(router.urls)),

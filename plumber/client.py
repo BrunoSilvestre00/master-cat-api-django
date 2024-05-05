@@ -3,7 +3,10 @@ from typing_extensions import Tuple
 
 
 class Endpoints(object):
-    HEALTH_CHECK = '/hc'
+    HEALTH_CHECK = 'hc'
+    START_ASSESSEMENT = 'start-assessment'
+    NEXT_ITEM = 'next-item'
+    
 
 
 class PlumberClient(object):
@@ -18,3 +21,24 @@ class PlumberClient(object):
             return True, response.json()
         except:
             return False, { 'status': 'Unhealthy!' }
+    
+    def start_assesment(self, questions: list, theta: float = 0.1) -> dict:
+        payload = { 
+            'questions': questions,
+            'pattern_theta': theta,
+        }
+        response = self.base.make_request(
+            Endpoints.START_ASSESSEMENT, method='POST', body=payload
+        )
+        return response.json()
+
+    def next_item(self, answer: bool, previous_index: int, encoded_design: str) -> dict:
+        payload = { 
+            'answer': answer,
+            'previous_index': previous_index,
+            'design': encoded_design, 
+        }
+        response = self.base.make_request(
+            Endpoints.NEXT_ITEM, method='POST', body=payload
+        )
+        return response.json()

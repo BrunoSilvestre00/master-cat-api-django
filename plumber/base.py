@@ -21,7 +21,7 @@ class BaseClient(object):
             return
         
         headers = {"Authorization": f"Bearer {self.auth.get('token')}"}
-        url = self.base_url + endpoint
+        url = f'{self.base_url}/{endpoint}'
         
         session = requests.Session()
         return session.request(method, url, headers=headers, params=query, json=body)

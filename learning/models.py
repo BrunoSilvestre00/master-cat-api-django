@@ -3,6 +3,7 @@ from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 
 from core.models import SoftDeletableModel
+from user.models import StudentUser
 
 
 class IRTParams(models.Model):
@@ -106,3 +107,24 @@ class Assessment(SoftDeletableModel):
     def __str__(self) -> str:
         return f'{self.pk} {self.name}'
 
+
+class UserAssessment(SoftDeletableModel):
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    
+    STATUS_CHOICES = (
+        (IN_PROGRESS, "Em Progresso"),
+        (COMPLETED, "Finalizado"),
+    )
+    
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
+    user = models.ForeignKey(StudentUser, on_delete=models.CASCADE, related_name="assessments")
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name="users")
+    status = models.CharField("Status", max_length=255, choices=STATUS_CHOICES, default=IN_PROGRESS)
+    next_index = models.IntegerField("Próximo Índice", default=0)
+    design = models.TextField("Design", default=None, null=True, blank=True)
+    
+    class Meta:
+        db_table = "user_has_assessments"
+        verbose_name = "Avaliação do Usuário"
+        verbose_name_plural = "Avaliações dos Usuários"
