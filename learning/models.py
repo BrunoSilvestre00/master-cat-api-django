@@ -72,7 +72,7 @@ class Alternative(SoftDeletableModel):
 class QuestionPool(SoftDeletableModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     name = models.CharField("Nome", max_length=255)
-    questions = models.ManyToManyField(Question, related_name="pools")
+    questions = models.ManyToManyField(Question, related_name="pools", through="QuestionPoolHasQuestion")
     
     class Meta:
         db_table = "question_pools"
@@ -88,10 +88,29 @@ class QuestionPool(SoftDeletableModel):
     @classmethod
     def create_pool(cls, queryset: list) -> 'QuestionPool':
         pool = cls.objects.create(name="_")
-        pool.questions.set(queryset)
+        
+        qphq = [
+            QuestionPoolHasQuestion(
+                pool=pool, question=q, order=i+1
+            ) for i, q in enumerate(queryset)
+        ]
+        QuestionPoolHasQuestion.objects.bulk_create(qphq)
+        
         pool.name = f"Pool_{pool.id}_{pool.created}"
         pool.save()
+        
         return pool
+
+
+class QuestionPoolHasQuestion(SoftDeletableModel):
+    pool = models.ForeignKey(QuestionPool, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    order = models.PositiveIntegerField("Ordem", default=1)
+    
+    class Meta:
+        db_table = "question_pool_has_questions"
+        verbose_name = "Questão no Banco de Questões"
+        verbose_name_plural = "Questões nos Bancos de Questões"
 
 
 class Assessment(SoftDeletableModel):

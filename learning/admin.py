@@ -35,7 +35,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 
 class QuestionInline(admin.TabularInline):
-    model = QuestionPool.questions.through
+    model = QuestionPoolHasQuestion
     extra = 1
 
 

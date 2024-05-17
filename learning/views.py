@@ -1,7 +1,7 @@
 from requests import Response
 from rest_framework import viewsets, status
 from plumber.client import PlumberClient
-from .models import Assessment, UserAssessment, Alternative
+from .models import *
 from .serializers import *
 
 
@@ -81,10 +81,12 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
             return Response(payload, status=status.HTTP_200_OK)
         
         user_assessment.save(update_fields=['next_index', 'design'])
-        
-        next_question = user_assessment.assessment.pool.questions\
-            .selected_related('alternatives')\
-            .get(uuid=plumb_response.get('next_item'))
+            
+        next_question = QuestionPoolHasQuestion.objects\
+            .select_related('question').get(
+                pool_id=user_assessment.assessment.pool_id,
+                order=plumb_response.get('next_index')
+            ).question
         
         data = {
             'user_assessment': user_assessment.uuid,
