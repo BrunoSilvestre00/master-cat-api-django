@@ -36,6 +36,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 class QuestionInline(admin.TabularInline):
     model = QuestionPoolHasQuestion
+    fields = ('question',)
     extra = 1
 
 

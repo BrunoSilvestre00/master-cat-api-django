@@ -147,3 +147,38 @@ class UserAssessment(SoftDeletableModel):
         db_table = "user_has_assessments"
         verbose_name = "Avaliação do Usuário"
         verbose_name_plural = "Avaliações dos Usuários"
+
+
+class MirtDesignData(SoftDeletableModel):
+    user_assessment = models.ForeignKey(
+        UserAssessment, on_delete=models.SET_DEFAULT, related_name="design_data", 
+        default=None, null=True, blank=True
+    )
+    item_history = models.JSONField("Histórico de Itens", default=list)
+    response_history = models.JSONField("Histórico de Respostas", default=list)
+    theta_history = models.JSONField("Histórico de Theta", default=list)
+    standard_error_history = models.JSONField("Histórico de Erro Padrão do Theta", default=list)
+    
+    class Meta:
+        db_table = "mirt_design_data"
+        verbose_name = "Dados de Design MIRT"
+        verbose_name_plural = "Dados de Design MIRT"
+        
+    def __last(self, iter: list) -> float:
+        return iter[-1] if len(iter) else 0.0
+    
+    @property
+    def last_theta(self) -> float:
+        return self.__last(self.theta_history)
+    
+    @property
+    def last_standard_error(self) -> float:
+        return self.__last(self.standard_error_history)
+    
+    @property
+    def last_item(self) -> int:
+        return self.__last(self.item_history)
+    
+    @property
+    def last_response(self) -> bool:
+        return self.__last(self.response_history)

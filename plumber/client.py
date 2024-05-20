@@ -6,8 +6,8 @@ class Endpoints(object):
     HEALTH_CHECK = 'hc'
     START_ASSESSEMENT = 'start-assessment'
     NEXT_ITEM = 'next-item'
+    GET_DESIGN_DATA = 'get-design-data'
     
-
 
 class PlumberClient(object):
 
@@ -40,5 +40,12 @@ class PlumberClient(object):
         }
         response = self.base.make_request(
             Endpoints.NEXT_ITEM, method='POST', body=payload
+        )
+        return response.json()
+    
+    def get_design_data(self, encoded_design: str) -> dict:
+        payload = { 'design': encoded_design }
+        response = self.base.make_request(
+            Endpoints.GET_DESIGN_DATA, method='POST', body=payload
         )
         return response.json()

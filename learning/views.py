@@ -1,8 +1,9 @@
-from requests import Response
 from rest_framework import viewsets, status
+from rest_framework.response import Response
 from plumber.client import PlumberClient
 from .models import *
 from .serializers import *
+from .services import QuestionPoolService, UserAssessmentService
 
 
 class UserAssessmentViewset(viewsets.ModelViewSet):
@@ -12,7 +13,7 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         return UserAssessmentViewset.objects\
             .filter(user_id=self.request.user.id)
 
-    def create(self, request, uuid=None):
+    def create(self, request):
         # TODO: improve security and error handling
         
         assessment = Assessment.objects.get(
@@ -26,8 +27,9 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         
         plumb_response = PlumberClient().start_assesment(questions_data)
         
+        # TODO: dinamically set user_id
         user_assessment, _ = UserAssessment.objects.update_or_create(
-            user_id=1,
+            user_id=2,
             assessment_id=assessment.id,
             defaults=dict(
                 next_index=plumb_response.get('next_index', 0),
@@ -35,8 +37,9 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
             )
         )
         
-        next_question = questions.select_related('alternatives')\
-            .get(uuid=plumb_response.get('next_item'))
+        next_question = QuestionPoolService.get_next_question(
+            assessment.pool_id, plumb_response.get('next_index')
+        )
         assesssment_data: dict = AssessmentSerializer(assessment).data
         
         data = {
@@ -48,11 +51,11 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         
         return Response(data, status=status.HTTP_200_OK)
 
-    def update(self, request, uuid=None):
+    def update(self, request, pk=None):
         # TODO: improve security and error handling
         
         user_assessment = UserAssessment.objects\
-            .select_related('assessment').get(uuid=uuid)
+            .select_related('assessment').get(uuid=pk)
         payload = request.data.copy()
         
         alternative = Alternative.objects.get(uuid=payload.get('alternative'))
@@ -71,6 +74,9 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         if stop_assessment:
             user_assessment.status = UserAssessment.COMPLETED
             user_assessment.save(update_fields=['next_index', 'design', 'status'])
+            
+            UserAssessmentService.get_design_data(user_assessment)
+            
             payload = { 
                 'user_assessment': user_assessment.uuid,
                 'status': UserAssessment.COMPLETED,
@@ -91,7 +97,7 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         data = {
             'user_assessment': user_assessment.uuid,
             'status': UserAssessment.IN_PROGRESS,
-            'next_question': QuestionPlumberSerializer(next_question).data,
+            'next_question': QuestionSerializer(next_question).data,
             **assessment_data
         }
         

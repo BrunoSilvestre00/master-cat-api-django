@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Question, Alternative
+from .models import Question, Alternative, Assessment
 
 
 class AlternativeSerializer(serializers.ModelSerializer):
@@ -31,5 +31,5 @@ class AssessmentSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='uuid', read_only=True)
     
     class Meta:
-        model = Question
+        model = Assessment
         fields = ('id', 'name')
