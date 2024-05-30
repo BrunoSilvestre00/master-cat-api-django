@@ -1,6 +1,7 @@
 services:
   django-api:
     build: .
+    image: brunosilvestre00/django-cat-api
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
