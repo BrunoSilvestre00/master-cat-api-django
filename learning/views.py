@@ -19,7 +19,7 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         assessment = Assessment.objects.get(
             uuid=request.data.get('assessment')
         )
-        questions = assessment.pool.questions.all()
+        questions = assessment.pool.questions.all().order_by('questionpoolhasquestion__order')
         
         questions_data = QuestionPlumberSerializer(
             questions, many=True
