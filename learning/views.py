@@ -29,7 +29,7 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         
         # TODO: dinamically set user_id
         user_assessment, _ = UserAssessment.objects.update_or_create(
-            user_id=2,
+            user_id=request.user.id,
             assessment_id=assessment.id,
             defaults=dict(
                 next_index=plumb_response.get('next_index', 0),

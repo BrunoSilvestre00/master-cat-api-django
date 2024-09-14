@@ -1,45 +1,25 @@
-from django.http import HttpResponseNotFound
-from django.shortcuts import redirect, render
-from django.views import View
-from utils.handle import handle_POST
+from rest_framework.response import Response
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 
-from .models import Visitor
+from user.models import User, UserToken
 
 
-class VisitorView(View):
-    template_name = 'visitor-form.html'
+class UserAuthViewset(viewsets.GenericViewSet):
 
-    def get(self, request, param=None, context={}):
-        context['visitor'] = None
-        context['form_title'] = 'CADASTRO DE VISITANTE'
-        context['btn_label'] = 'Cadastrar'
-        if param != 'novo':
-            try:
-                context['visitor'] = Visitor.objects.get(uuid=param)
-                context['form_title'] = 'ATUALIZAÇÃO DE VISITANTE'
-                context['btn_label'] = 'Atualizar'
-            except:
-                return HttpResponseNotFound(f'<h1>Visitante não encontrado!</h1><h2>id={param}</h2>')
-        
-        return render(request, self.template_name, context)
-    
-    def post(self, request, param=None):
-        visitor = self.__valid_visitor(handle_POST(request.POST), param)
-        if visitor:
-            visitor.save()
-        return redirect('visitante', param=visitor.uuid)
-    
-    def __valid_visitor(self, values, param):
+    def get_serializer(self, *args, **kwargs):
+        return None
 
-        if param == 'novo':
-            if visitor := Visitor.objects.filter(cpf=values['cpf']).first():
-                return visitor
-            visitor = Visitor()
-        else:
-            visitor = Visitor.objects.get(uuid=param)
+    @action(methods=["POST"], detail=False, url_path="login", url_name="login")
+    def login(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
 
-        for k in values:
-            setattr(visitor, k, values[k])
+        user = User.objects.filter(email=email).first()
+        if not user or not user.check_password(password):
+            return Response(
+                {"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-        return visitor
-        
+        token, _ = UserToken.objects.get_or_create(user=user)
+        return Response({"token": token.token}, status=status.HTTP_200_OK)
