@@ -1,5 +1,5 @@
-from rest_framework.response import Response
 from rest_framework import viewsets, status
+from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from user.models import User, UserToken
@@ -22,4 +22,8 @@ class UserAuthViewset(viewsets.GenericViewSet):
             )
 
         token, _ = UserToken.objects.get_or_create(user=user)
-        return Response({"token": token.token}, status=status.HTTP_200_OK)
+        data = {
+            "token": token.token,
+            "user_id": user.uuid,
+        }
+        return Response(data, status=status.HTTP_200_OK)
