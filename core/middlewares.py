@@ -7,8 +7,7 @@ class AuthUserMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         try:
-            user, _ = TokenAuthentication().authenticate(request)
-            if user:
-                request.user = user
+            _user, _ = TokenAuthentication().authenticate(request)
+            request._user = _user
         except:
             pass

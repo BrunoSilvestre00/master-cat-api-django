@@ -1,25 +1,37 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from core.permissions import HasAPIAccess
 from plumber.client import PlumberClient
 from .models import *
 from .serializers import *
 from .services import QuestionPoolService, UserAssessmentService
 
 
+class AssessmentViewset(viewsets.ModelViewSet):
+    queryset = Assessment.objects.all()
+    serializer_class = AssessmentSerializer
+    permission_classes = [HasAPIAccess]
+    lookup_field = 'uuid'
+    
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+
 class UserAssessmentViewset(viewsets.ModelViewSet):
     serializer_class = None
+    permission_classes = [HasAPIAccess]
+    lookup_field = 'uuid'
 
     def get_queryset(self):
         return UserAssessmentViewset.objects\
             .filter(user_id=self.request.user.id)
 
     def create(self, request):
-        # TODO: improve security and error handling
-        
         assessment = Assessment.objects.get(
             uuid=request.data.get('assessment')
         )
-        questions = assessment.pool.questions.all().order_by('questionpoolhasquestion__order')
+        questions = assessment.pool.questions.all()\
+            .order_by('questionpoolhasquestion__order')
         
         questions_data = QuestionPlumberSerializer(
             questions, many=True
@@ -27,7 +39,6 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         
         plumb_response = PlumberClient().start_assesment(questions_data)
         
-        # TODO: dinamically set user_id
         user_assessment, _ = UserAssessment.objects.update_or_create(
             user_id=request.user.id,
             assessment_id=assessment.id,
@@ -51,11 +62,9 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         
         return Response(data, status=status.HTTP_200_OK)
 
-    def update(self, request, pk=None):
-        # TODO: improve security and error handling
-        
+    def update(self, request, uuid=None):
         user_assessment = UserAssessment.objects\
-            .select_related('assessment').get(uuid=pk)
+            .select_related('assessment').get(uuid=uuid)
         payload = request.data.copy()
         
         alternative = Alternative.objects.get(uuid=payload.get('alternative'))
