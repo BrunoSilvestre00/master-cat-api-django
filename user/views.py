@@ -1,3 +1,4 @@
+import uuid
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -21,7 +22,9 @@ class UserAuthViewset(viewsets.GenericViewSet):
                 {"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        token, _ = UserToken.objects.get_or_create(user=user)
+        token, _ = UserToken.objects.get_or_create(
+            user=user, defaults={"token": uuid.uuid4().__str__()}
+        )
         data = {
             "token": token.token,
             "user_id": user.uuid,
