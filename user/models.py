@@ -45,3 +45,44 @@ class UserToken(TimeStampedModel):
         return (
             arrow.get(self.modified).shift(seconds=self.TOKEN_LIFETIME) > arrow.utcnow()
         )
+
+
+class UserPool(SoftDeletableModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
+    name = models.CharField("Nome", max_length=255)
+    users = models.ManyToManyField(User, related_name="pools", through="UserPoolHasUser")
+    assessments = models.ManyToManyField("learning.Assessment", related_name="pools", through="UserPoolHasAssessment")
+
+    class Meta:
+        db_table = "user_pools"
+        verbose_name = "Turma"
+        verbose_name_plural = "Turmas"
+        
+    def __str__(self) -> str:
+        return self.name
+
+
+class UserPoolHasUser(SoftDeletableModel):
+    pool = models.ForeignKey(UserPool, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "user_pool_has_users"
+        verbose_name = "Usuário na Turma"
+        verbose_name_plural = "Usuários nas Turmas"
+    
+    def __str__(self) -> str:
+        return f"{self.pool} - {self.user}"
+
+
+class UserPoolHasAssessment(SoftDeletableModel):
+    pool = models.ForeignKey(UserPool, on_delete=models.CASCADE)
+    assessment = models.ForeignKey("learning.Assessment", on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "user_pool_has_assessments"
+        verbose_name = "Avaliação da Turma"
+        verbose_name_plural = "Avaliações das Turmas"
+        
+    def __str__(self) -> str:
+        return f"{self.pool} - {self.assessment.name}"

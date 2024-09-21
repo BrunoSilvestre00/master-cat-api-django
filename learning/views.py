@@ -1,17 +1,23 @@
+import arrow
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from core.permissions import HasAPIAccess
 from plumber.client import PlumberClient
 from .models import *
 from .serializers import *
-from .services import QuestionPoolService, UserAssessmentService
+from .services import AssessmentService, QuestionPoolService, UserAssessmentService
 
 
 class AssessmentViewset(viewsets.ModelViewSet):
-    queryset = Assessment.objects.all()
+    queryset = Assessment.objects.filter(active=True)
     serializer_class = AssessmentSerializer
     permission_classes = [HasAPIAccess]
     lookup_field = 'uuid'
+    
+    def list(self, request, *args, **kwargs):
+        qs = AssessmentService.get_user_assessments(request.user)
+        data = AssessmentSerializer(qs, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
     
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
@@ -82,7 +88,8 @@ class UserAssessmentViewset(viewsets.ModelViewSet):
         
         if stop_assessment:
             user_assessment.status = UserAssessment.COMPLETED
-            user_assessment.save(update_fields=['next_index', 'design', 'status'])
+            user_assessment.finished = arrow.now().__str__()
+            user_assessment.save(update_fields=['next_index', 'design', 'status', 'finished'])
             
             UserAssessmentService.get_design_data(user_assessment)
             

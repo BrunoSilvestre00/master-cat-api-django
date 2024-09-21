@@ -22,3 +22,20 @@ class StudentUserAdmin(UserAdmin):
     def get_queryset(self, request):
         qs = super(StudentUserAdmin, self).get_queryset(request)
         return qs.filter(is_staff=False, is_superuser=False)
+
+
+class UserPoolHasUserInline(admin.TabularInline):
+    model = UserPoolHasUser
+    extra = 1
+
+
+class UserPoolHasAssessmentInline(admin.TabularInline):
+    model = UserPoolHasAssessment
+    extra = 1
+
+
+@admin.register(UserPool)
+class UserPoolAdmin(admin.ModelAdmin):
+    list_display = ('uuid', 'name')
+    readonly_fields = ('uuid',)
+    inlines = (UserPoolHasAssessmentInline, UserPoolHasUserInline)

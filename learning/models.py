@@ -116,6 +116,7 @@ class QuestionPoolHasQuestion(SoftDeletableModel):
 class Assessment(SoftDeletableModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     name = models.CharField("Nome", max_length=255)
+    active = models.BooleanField("Ativo", default=True)
     pool = models.ForeignKey(QuestionPool, on_delete=models.CASCADE, related_name="assessments")
     
     class Meta:
@@ -142,6 +143,7 @@ class UserAssessment(SoftDeletableModel):
     status = models.CharField("Status", max_length=255, choices=STATUS_CHOICES, default=IN_PROGRESS)
     next_index = models.IntegerField("Próximo Índice", default=0)
     design = models.TextField("Design", default=None, null=True, blank=True)
+    finished = models.DateTimeField("Finalizado", default=None, null=True, blank=True)
     
     class Meta:
         db_table = "user_has_assessments"

@@ -1,4 +1,5 @@
-from learning.models import UserAssessment, MirtDesignData, QuestionPoolHasQuestion, Question
+from learning.models import Assessment, UserAssessment, MirtDesignData, QuestionPoolHasQuestion, Question
+from user.models import User, UserPoolHasAssessment, UserPoolHasUser
 from plumber.client import PlumberClient
 
 class QuestionPoolService(object):
@@ -9,6 +10,20 @@ class QuestionPoolService(object):
             pool_id=pool_id,
             order=index
         ).question
+
+
+class AssessmentService(object):
+    
+    @classmethod
+    def get_user_assessments(cls, user: User):
+        qs = Assessment.objects.filter(active=True)
+        if not user.is_superuser:
+            user_pool_ids = UserPoolHasUser.objects.filter(
+                user__id=user.id).values_list('pool_id', flat=True)
+            user_assessments = UserPoolHasAssessment.objects.filter(
+                pool_id__in=user_pool_ids).values_list('assessment_id', flat=True)
+            qs = qs.filter(id__in=user_assessments)
+        return qs
 
 
 class UserAssessmentService(object):
