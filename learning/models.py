@@ -2,7 +2,7 @@ import uuid
 from django.db import models
 from django_ckeditor_5.fields import CKEditor5Field
 
-from core.models import SoftDeletableModel
+from core.models import CKEditorModelMixin, SoftDeletableModel
 from user.models import StudentUser
 
 
@@ -41,7 +41,7 @@ class QuestionMetadata(IRTParams, CDMParams):
         abstract = True
 
 
-class Question(SoftDeletableModel, QuestionMetadata):
+class Question(SoftDeletableModel, QuestionMetadata, CKEditorModelMixin):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     statement = CKEditor5Field("Enunciado")
 
@@ -53,8 +53,12 @@ class Question(SoftDeletableModel, QuestionMetadata):
     def __str__(self) -> str:
         return f'{self.pk} - {self.statement[:10]}...'
     
+    def save(self, *args, **kwargs):
+        self.handle_ck_editor_fields()
+        return super().save(*args, **kwargs)
+    
 
-class Alternative(SoftDeletableModel):
+class Alternative(SoftDeletableModel, CKEditorModelMixin):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     text = CKEditor5Field("Texto")
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="alternatives")
@@ -67,6 +71,10 @@ class Alternative(SoftDeletableModel):
 
     def __str__(self) -> str:
         return f'{self.pk} - {self.text[:10]}...'
+    
+    def save(self, *args, **kwargs):
+        self.handle_ck_editor_fields()
+        return super().save(*args, **kwargs)
 
 
 class QuestionPool(SoftDeletableModel):

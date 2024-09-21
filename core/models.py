@@ -5,6 +5,7 @@ from django.db.models.fields.files import ImageFieldFile
 from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import now
 from django.forms.models import model_to_dict
+from django_ckeditor_5.fields import CKEditor5Field
 
 from core.fields import AutoCreatedField, AutoLastModifiedField
 from core.managers import SoftDeletableManager, SoftDeletableUserManager
@@ -121,6 +122,45 @@ class SoftDeletableUserModel(SoftDeletableModel):
 
     class Meta:
         abstract = True
+
+
+class CKEditorModelMixin(object):
+
+    def __init__(self, *args, **kwargs):
+        super(CKEditorModelMixin, self).__init__(*args, **kwargs)
+        self._ck_editor_fields = self.get_ck_editor_fields()
+
+    @classmethod
+    def get_ck_editor_fields(cls):
+        return [field.name for field in cls._meta.fields if isinstance(field, CKEditor5Field)]
+    
+    def convert_images_to_base64(self, field):
+        import os
+        import base64
+        import urllib
+        from bs4 import BeautifulSoup
+        from pathlib import Path
+        
+        content = getattr(self, field)
+        
+        soup = BeautifulSoup(content, 'html.parser')
+        images = soup.find_all('img')
+        
+        for img in images:
+            img_src = img.get('src')
+            if 'media/' in img_src:
+                img_path = urllib.parse.unquote(os.getcwd() + img_src)
+                if img_path and Path(img_path).exists():
+                    with open(img_path, 'rb') as image_file:
+                        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                        img['src'] = f'data:image;base64,{encoded_string}'
+                    os.remove(img_path)
+        
+        setattr(self, field, str(soup))
+        
+    def handle_ck_editor_fields(self):
+        for field in self._ck_editor_fields:
+            self.convert_images_to_base64(field)
 
 
 class UploadQuestions(SoftDeletableModel):
