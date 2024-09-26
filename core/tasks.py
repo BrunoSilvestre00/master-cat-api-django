@@ -13,13 +13,17 @@ def upload_questions_json(obj_file) -> int:
         )
         Alternative.objects.bulk_create([Alternative(
             question=obj,
-            text=question.get(a_key), 
-            is_correct=question.get(f'{a_key}_is_correct', 0)
-        ) for a_key in filter(
-            lambda x: 'alternative_' in x and '_is_correct' not in x, 
-            question.keys()
-        )])
+            text=alternative.get('text', ''), 
+            is_correct=question.get(f'is_correct', False)
+        ) for alternative in question.get('alternatives', [])])
         questions_created.append(obj)
     
-    pool = QuestionPool.create_pool(questions_created)
+    pool = QuestionPool.create_pool(questions_created, super=True)
     return len(pool)
+
+
+def upload_questions_csv(obj_file) -> int:
+    import pandas as pd
+    return 0
+    
+    

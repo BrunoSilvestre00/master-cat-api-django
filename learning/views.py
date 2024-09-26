@@ -5,17 +5,20 @@ from core.permissions import HasAPIAccess
 from plumber.client import PlumberClient
 from .models import *
 from .serializers import *
-from .services import AssessmentService, QuestionPoolService, UserAssessmentService
+from .services import QuestionPoolService, UserAssessmentService
+from .repositories import AssessmentRepository
 
 
 class AssessmentViewset(viewsets.ModelViewSet):
-    queryset = Assessment.objects.filter(active=True)
     serializer_class = AssessmentSerializer
     permission_classes = [HasAPIAccess]
     lookup_field = 'uuid'
     
+    def get_queryset(self):
+        return AssessmentRepository.get_active_assessments()
+    
     def list(self, request, *args, **kwargs):
-        qs = AssessmentService.get_user_assessments(request.user)
+        qs = AssessmentRepository.get_user_assessments(request.user)
         data = AssessmentSerializer(qs, many=True).data
         return Response(data, status=status.HTTP_200_OK)
     

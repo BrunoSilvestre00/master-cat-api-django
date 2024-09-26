@@ -1,0 +1,40 @@
+{
+  "questions": [
+    {
+      "statement": "Exemplo de enunciado questao 1", //String
+      "discrimination": "Parâmtero de discriminação", //Float
+      "difficulty": "Parâmetro de dificuldade", //Float
+      "guess": "Parâmetro de chute", //Float
+      "alternatives": [
+        {
+          "text": "Exemplo de alternativa 1", //String
+          "is_correct": false //Boolean
+        },
+        {
+          "text": "Exemplo de alternativa 2", //String
+          "is_correct": true //Boolean
+        }
+      ]
+    },
+    {
+      "statement": "Exemplo de enunciado questao 2", //String
+      "discrimination": "Parâmtero de discriminação", //Float
+      "difficulty": "Parâmetro de dificuldade", //Float
+      "guess": "Parâmetro de chute", //Float
+      "alternatives": [
+        {
+          "text": "Exemplo de alternativa 1", //String
+          "is_correct": true //Boolean
+        },
+        {
+          "text": "Exemplo de alternativa 2", //String
+          "is_correct": false //Boolean
+        },
+        {
+          "text": "Exemplo de alternativa 3", //String
+          "is_correct": false //Boolean
+        }
+      ]
+    }
+  ]
+}

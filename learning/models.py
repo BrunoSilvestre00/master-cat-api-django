@@ -81,6 +81,7 @@ class QuestionPool(SoftDeletableModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     name = models.CharField("Nome", max_length=255)
     questions = models.ManyToManyField(Question, related_name="pools", through="QuestionPoolHasQuestion")
+    super_pool = models.BooleanField("É um Super Pool?", default=False)
     
     class Meta:
         db_table = "question_pools"
@@ -94,8 +95,8 @@ class QuestionPool(SoftDeletableModel):
         return self.questions.count()
     
     @classmethod
-    def create_pool(cls, queryset: list) -> 'QuestionPool':
-        pool = cls.objects.create(name="_")
+    def create_pool(cls, queryset: list, super=False) -> 'QuestionPool':
+        pool = cls.objects.create(name="_", super_pool=super)
         
         qphq = [
             QuestionPoolHasQuestion(
@@ -108,6 +109,14 @@ class QuestionPool(SoftDeletableModel):
         pool.save()
         
         return pool
+    
+
+class QuestionSuperPool(QuestionPool):
+    
+    class Meta:
+        verbose_name = "Super Banco de Questões"
+        verbose_name_plural = "Super Bancos de Questões"
+        proxy = True
 
 
 class QuestionPoolHasQuestion(SoftDeletableModel):
@@ -125,6 +134,8 @@ class Assessment(SoftDeletableModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     name = models.CharField("Nome", max_length=255)
     active = models.BooleanField("Ativo", default=True)
+    start = models.DateTimeField("Início", default=None, null=True, blank=True)
+    finish = models.DateTimeField("Fim", default=None, null=True, blank=True)
     pool = models.ForeignKey(QuestionPool, on_delete=models.CASCADE, related_name="assessments")
     
     class Meta:
@@ -173,6 +184,11 @@ class MirtDesignData(SoftDeletableModel):
         db_table = "mirt_design_data"
         verbose_name = "Dados de Design MIRT"
         verbose_name_plural = "Dados de Design MIRT"
+        
+    def __str__(self) -> str:
+        if self.user_assessment:
+            return f'{self.pk} | u: {self.user_assessment.user} | a: {self.user_assessment.assessment}'
+        return f'{self.pk} - MIRT Design Data'
         
     def __last(self, iter: list) -> float:
         return iter[-1] if len(iter) else 0.0

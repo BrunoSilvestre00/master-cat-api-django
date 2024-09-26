@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpRequest
 from .models import *
 
 
@@ -9,6 +10,8 @@ class AlternativeInline(admin.TabularInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
+    search_fields = ('uuid', 'statement')
+    list_filter = ('pools',)
     list_display = ('uuid', 'id', '__str__')
     readonly_fields = ('id', 'uuid')
     actions = ['create_pool']
@@ -42,12 +45,13 @@ class QuestionInline(admin.TabularInline):
 
 @admin.register(QuestionPool)
 class QuestionPoolAdmin(admin.ModelAdmin):
+    list_filter = ('super_pool',)
     list_display = ('name', 'id', 'uuid', 'get_count')
     readonly_fields = ('id', 'uuid', 'get_count')
     inlines = [QuestionInline]
     fieldsets = (
         (None, {
-            'fields': ('id', 'uuid', 'name')
+            'fields': ('id', 'uuid', 'name', 'super_pool')
         }),
     )
     
@@ -56,6 +60,15 @@ class QuestionPoolAdmin(admin.ModelAdmin):
     
     get_count.short_description = "# Questões"
 
+
+@admin.register(QuestionSuperPool)
+class QuestionSuperPoolAdmin(QuestionPoolAdmin):
+    list_filter = []
+    
+    def get_queryset(self, request):
+        qs = super(QuestionSuperPoolAdmin, self).get_queryset(request)
+        return qs.filter(super_pool=True)
+    
 
 @admin.register(Assessment)
 class AssessmentAdmin(admin.ModelAdmin):
@@ -66,3 +79,24 @@ class AssessmentAdmin(admin.ModelAdmin):
             'fields': ('id', 'uuid', 'name', 'pool')
         }),
     )
+
+
+@admin.register(MirtDesignData)
+class MirtDesignDataAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'assessment')
+        }),
+        ('Info', {
+            'fields': ('item_history', 'response_history', 'theta_history', 'standard_error_history')
+        })
+    )
+    
+    def user(self, obj):
+        return obj.user_assessment.user.__str__()
+    
+    def assessment(self, obj):
+        return obj.user_assessment.assessment.__str__()
+    
+    def has_change_permission(self, *args, **kwargs):
+        return False
